@@ -1,20 +1,23 @@
 if ENV["APPRAISAL_INITIALIZED"]
-  RSpec.describe 'before_commit hook', type: :controller do
+  RSpec.describe 'rollback hooks', type: :controller do
     class Callbacks
       class << self
-        attr_accessor :fired, :entities
+        attr_accessor :rollbacks, :commits
       end
 
-      def self.add(name, object)
-        self.fired[name] = object
-        self.entities << name
+      def self.add_rollback(object)
+        self.rollbacks << object
+      end
+
+      def self.add_commit(object)
+        self.commits << object
       end
     end
 
     before do
-      Callbacks.fired = {}
-      Callbacks.entities = []
-      $raise_on_before_commit = { employee: true }
+      Callbacks.rollbacks = []
+      Callbacks.commits = []
+      $raise_on_before_commit = { }
     end
 
     before do
@@ -26,16 +29,22 @@ if ENV["APPRAISAL_INITIALIZED"]
     module IntegrationHooks
       class ApplicationResource < Graphiti::Resource
         self.adapter = Graphiti::Adapters::ActiveRecord
+        before_commit do |record|
+          Callbacks.add_commit(record)
+
+          if $raise_on_before_commit[record.class.name]
+            raise 'rollitback'
+          end
+
+          record
+        end
       end
 
       class DepartmentResource < ApplicationResource
         self.model = ::Department
 
-        before_commit do |department|
-          Callbacks.add(:department, department)
-          if $raise_on_before_commit[:department]
-            raise 'rollitback_department'
-          end
+        on_rollback do |record|
+          Callbacks.add_rollback(record)
         end
       end
 
@@ -44,11 +53,8 @@ if ENV["APPRAISAL_INITIALIZED"]
 
         attribute :employee_id, :integer, only: [:writable]
 
-        before_commit do |position|
-          Callbacks.add(:position, position)
-          if $raise_on_before_commit[:position]
-            raise 'rollitback_book'
-          end
+        on_rollback do |record|
+          Callbacks.add_rollback(record)
         end
 
         belongs_to :department
@@ -59,25 +65,8 @@ if ENV["APPRAISAL_INITIALIZED"]
 
         attribute :first_name, :string
 
-        before_commit only: [:create] do |employee|
-          Callbacks.add(:create, employee)
-          if $raise_on_before_commit[:employee]
-            raise 'rollitback'
-          end
-        end
-
-        before_commit only: [:update] do |employee|
-          Callbacks.add(:update, employee)
-          if $raise_on_before_commit[:employee]
-            raise 'rollitback'
-          end
-        end
-
-        before_commit only: [:destroy] do |employee|
-          Callbacks.add(:destroy, employee)
-          if $raise_on_before_commit[:employee]
-            raise 'rollitback'
-          end
+        on_rollback only: [:create] do |record|
+          Callbacks.add_rollback(record)
         end
 
         has_many :positions
@@ -89,26 +78,6 @@ if ENV["APPRAISAL_INITIALIZED"]
         employee = IntegrationHooks::EmployeeResource.build(params)
 
         if employee.save
-          render jsonapi: employee
-        else
-          raise 'whoops'
-        end
-      end
-
-      def update
-        employee = IntegrationHooks::EmployeeResource.find(params)
-
-        if employee.update_attributes
-          render_jsonapi(employee, scope: false)
-        else
-          raise 'whoops'
-        end
-      end
-
-      def destroy
-        employee = IntegrationHooks::EmployeeResource.find(params)
-
-        if employee.destroy
           render jsonapi: employee
         else
           raise 'whoops'
@@ -141,8 +110,8 @@ if ENV["APPRAISAL_INITIALIZED"]
       JSON.parse(response.body)
     end
 
-    context 'before_commit' do
-      context 'on create' do
+    context 'on_rollback' do
+      context 'when creating a single resource' do
         let(:payload) do
           {
             data: {
@@ -152,19 +121,30 @@ if ENV["APPRAISAL_INITIALIZED"]
           }
         end
 
-        it 'fires after validations but before ending the transaction' do
-          expect_any_instance_of(Graphiti::Util::ValidationResponse)
-            .to receive(:validate!)
-          expect {
+        context 'when the creation is successful' do
+          it "does not call rollback hook" do
             post :create, params: payload
-          }.to raise_error('rollitback')
-          expect(Employee.count).to be_zero
-          expect(Callbacks.entities.length).to eq(1)
-          expect(Callbacks.fired[:create]).to be_a(Employee)
+
+            expect(Callbacks.rollbacks).to eq []
+          end
+        end
+
+        context 'when the resource raises an error in before_commit' do
+          before do
+            $raise_on_before_commit = { 'Employee' => true }
+          end
+
+          it "does not call rollback hook" do
+            expect {
+              post :create, params: payload
+            }.to raise_error('rollitback')
+
+            expect(Callbacks.rollbacks).to eq []
+          end
         end
       end
 
-      context 'nested' do
+      context 'creating nested resources' do
         let(:payload) do
           {
             data: {
@@ -198,19 +178,26 @@ if ENV["APPRAISAL_INITIALIZED"]
           }
         end
 
-        before do
-          $raise_on_before_commit = {}
+        context 'when creation is successful' do
+          it 'does not call any rollback hooks' do
+            post :create, params: payload
+
+            expect(Callbacks.rollbacks).to eq []
+          end
         end
 
-        it 'fires after validations but before ending the transaction' do
-          expect_any_instance_of(Graphiti::Util::ValidationResponse)
-            .to receive(:validate!)
-          post :create, params: payload
-          expect(Callbacks.entities)
-            .to eq([:create, :position, :department])
-          expect(Callbacks.fired[:create]).to be_a(Employee)
-          expect(Callbacks.fired[:position]).to be_a(Position)
-          expect(Callbacks.fired[:department]).to be_a(Department)
+        context 'when one of the resources throws an error in a before_commit hook' do
+          before do
+            $raise_on_before_commit = { 'Department' => true }
+          end
+
+          it 'runs rollback hook for any previously commited resources in reverse order' do
+            expect {
+              post :create, params: payload
+            }.to raise_error('rollitback')
+
+            expect(Callbacks.rollbacks).to eq [Callbacks.commits[1], Callbacks.commits[0]]
+          end
         end
       end
     end

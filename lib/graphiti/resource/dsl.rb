@@ -86,6 +86,12 @@ module Graphiti
           end
         end
 
+        def on_rollback(only: [:create, :update, :destroy], &blk)
+          Array(only).each do |verb|
+            config[:on_rollback][verb] = blk
+          end
+        end
+
         def attribute(name, type, options = {}, &blk)
           raise Errors::TypeNotFound.new(self, name, type) unless Types[type]
           attribute_option(options, :readable)

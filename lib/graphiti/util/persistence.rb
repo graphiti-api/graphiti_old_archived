@@ -61,15 +61,22 @@ class Graphiti::Util::Persistence
 
     post_process(persisted, parents)
     post_process(persisted, children)
+
     before_commit = -> { @resource.before_commit(persisted, @meta[:method]) }
-    add_hook(before_commit)
+    on_rollback = ->(record) { @resource.on_rollback(record, @meta[:method]) }
+    add_hooks(before_commit, on_rollback)
+
     persisted
   end
 
   private
 
-  def add_hook(prc)
-    ::Graphiti::Util::Hooks.add(prc)
+  def add_hooks(bc, rb)
+    ::Graphiti::Util::Hooks.add(bc, rb)
+  end
+
+  def add_post_process_hook(prc)
+    ::Graphiti::Util::Hooks.add_post_process(prc)
   end
 
   # The child's attributes should be modified to nil-out the
@@ -185,7 +192,7 @@ class Graphiti::Util::Persistence
       group.group_by { |g| g[:sideload] }.each_pair do |sideload, members|
         objects = members.map { |x| x[:object] }
         hook = -> { sideload.fire_hooks!(caller_model, objects, method) }
-        add_hook(hook)
+        add_post_process_hook(hook)
       end
     end
   end

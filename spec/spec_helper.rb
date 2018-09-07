@@ -11,6 +11,8 @@ Graphiti::Resource.autolink = false
 require 'fixtures/poro'
 
 RSpec.configure do |config|
+  config.filter_run_when_matching :focus
+
   config.include GraphitiSpecHelpers::RSpec
   config.include GraphitiSpecHelpers::Sugar
 

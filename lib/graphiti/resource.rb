@@ -122,7 +122,16 @@ module Graphiti
 
     def before_commit(model, method)
       hook = self.class.config[:before_commit][method]
-      hook.call(model) if hook
+      if hook
+        hook.call(model)
+      else
+        model
+      end
+    end
+
+    def on_rollback(record, method)
+      hook = self.class.config[:on_rollback][method]
+      hook.call(record) if hook
     end
 
     def transaction
