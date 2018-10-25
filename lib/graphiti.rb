@@ -69,6 +69,7 @@ require "graphiti/extensions/boolean_attribute"
 require "graphiti/extensions/temp_id"
 require "graphiti/serializer"
 require "graphiti/debugger"
+require "graphiti/tracing"
 
 if defined?(ActiveRecord)
   require 'graphiti/adapters/active_record'
@@ -154,6 +155,14 @@ module Graphiti
   def self.log(msg, color = :white, bold = false)
     colored = ActiveSupport::LogSubscriber.new.send(:color, msg, color, bold)
     logger.debug(colored)
+  end
+
+  def self.tracer
+    @tracer ||= Graphiti::Tracer.new
+  end
+
+  def self.tracer=(tracer)
+    @tracer = tracer
   end
 
   # When we add a sideload, we need to do configuration, such as

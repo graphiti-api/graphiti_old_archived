@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'graphiti_errors', '~> 1.0.beta.1'
   spec.add_dependency 'concurrent-ruby', '~> 1.0'
   spec.add_dependency 'activesupport', ['>= 4.1', '< 6']
+  spec.add_dependency 'opentracing', '~> 0.4.3'
 
   spec.add_development_dependency "activerecord", ['>= 4.1', '< 6']
   spec.add_development_dependency "kaminari", '~> 0.17'

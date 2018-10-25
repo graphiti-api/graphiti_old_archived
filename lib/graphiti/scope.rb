@@ -17,7 +17,7 @@ module Graphiti
       if @query.zero_results?
         []
       else
-        resolved = broadcast_data do |payload|
+        resolved = data_telemetry do |payload|
           payload[:results] = @resource.resolve(@object)
           payload[:results]
         end
@@ -34,15 +34,20 @@ module Graphiti
 
     private
 
-    def broadcast_data
+    def data_telemetry
       opts = {
         resource: @resource,
         params: @opts[:params],
         sideload: @opts[:sideload],
         parent: @opts[:parent]
       }
-      Graphiti.broadcast("data", opts) do |payload|
-        yield payload
+
+      Graphiti.tracer.trace('resolve') do |trace_scope|
+        Graphiti.tracer.set_scope_tags(trace_scope.span, opts[:params])
+
+        Graphiti.broadcast("data", opts) do |payload|
+          yield payload
+        end
       end
     end
 
@@ -93,12 +98,18 @@ module Graphiti
     end
 
     def apply_scoping(scope, opts)
-      @object = scope
-      add_scoping(nil, Graphiti::Scoping::DefaultFilter, opts)
-      add_scoping(:filter, Graphiti::Scoping::Filter, opts)
-      add_scoping(:sort, Graphiti::Scoping::Sort, opts)
-      add_scoping(:paginate, Graphiti::Scoping::Paginate, opts)
-      @object
+      Graphiti.tracer.trace('build_scope') do |trace_scope|
+        trace_scope.span.set_tag('graphiti.resource', @resource.class.name)
+        Graphiti.tracer.set_scope_tags(trace_scope.span, @opts[:params])
+
+        @object = scope
+        add_scoping(nil, Graphiti::Scoping::DefaultFilter, opts)
+        add_scoping(:filter, Graphiti::Scoping::Filter, opts)
+        add_scoping(:sort, Graphiti::Scoping::Sort, opts)
+        add_scoping(:paginate, Graphiti::Scoping::Paginate, opts)
+
+        @object
+      end
     end
 
     def add_scoping(key, scoping_class, opts, default = {})

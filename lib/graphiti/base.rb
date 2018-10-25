@@ -43,6 +43,7 @@ module Graphiti
           Graphiti::Deserializer.new(payload)
         end
       end
+
     end
 
     def jsonapi_render_options
