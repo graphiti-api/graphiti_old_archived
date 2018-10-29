@@ -9,22 +9,22 @@ module Graphiti
     self.chunks = []
 
     class << self
-      def on_data(name, start, stop, id, payload)
+      def on_resolve(name, start, stop, id, payload)
         took = ((stop-start)*1000.0).round(2)
         params = scrub_params(payload[:params])
 
         if payload[:exception]
-          on_data_exception(payload, params)
+          on_resolve_exception(payload, params)
         else
           if payload[:sideload]
-            on_sideload_data(payload, params, took)
+            on_sideload_resolve(payload, params, took)
           else
-            on_primary_data(payload, params, took)
+            on_primary_resolve(payload, params, took)
           end
         end
       end
 
-      def on_data_exception(payload, params)
+      def on_resolve_exception(payload, params)
         unless payload[:exception_object].instance_variable_get(:@__graphiti_debug)
           add_chunk do |logs, json|
             logs << ["\n=== Graphiti Debug ERROR", :red, true]
@@ -55,7 +55,7 @@ module Graphiti
         raw_results.map { |r| "[#{r.class.name}, #{r.id.inspect}]" }.join(', ')
       end
 
-      def on_sideload_data(payload, params, took)
+      def on_sideload_resolve(payload, params, took)
         sideload = payload[:sideload]
         results = results(payload[:results])
         add_chunk(payload[:resource], payload[:parent]) do |logs, json|
@@ -73,7 +73,7 @@ module Graphiti
         end
       end
 
-      def on_primary_data(payload, params, took)
+      def on_primary_resolve(payload, params, took)
         results = results(payload[:results])
         add_chunk(payload[:resource], payload[:parent]) do |logs, json|
           logs << [""]
@@ -189,7 +189,7 @@ module Graphiti
     end
 
     ActiveSupport::Notifications.subscribe \
-      'graphiti.data', method(:on_data)
+      'graphiti.resolve', method(:on_resolve)
     ActiveSupport::Notifications.subscribe \
       'graphiti.render', method(:on_render)
   end

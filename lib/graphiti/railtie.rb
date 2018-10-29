@@ -30,6 +30,12 @@ module Graphiti
       configure_endpoint_lookup
     end
 
+    initializer 'graphti.logger' do
+      config.after_initialize do
+        Graphiti.logger = ::Rails.logger
+      end
+    end
+
     # from jsonapi-rails
     PARSER = lambda do |body|
       data = JSON.parse(body)

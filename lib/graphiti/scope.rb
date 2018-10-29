@@ -17,10 +17,18 @@ module Graphiti
       if @query.zero_results?
         []
       else
-        resolved = data_telemetry do |payload|
+        payload = {
+          resource: @resource,
+          params: @opts[:params],
+          sideload: @opts[:sideload],
+          parent: @opts[:parent]
+        }
+
+        resolved = instrument 'resolve', payload do
           payload[:results] = @resource.resolve(@object)
           payload[:results]
         end
+
         resolved.compact!
         assign_serializer(resolved)
         yield resolved if block_given?
@@ -34,20 +42,17 @@ module Graphiti
 
     private
 
-    def data_telemetry
-      opts = {
-        resource: @resource,
-        params: @opts[:params],
-        sideload: @opts[:sideload],
-        parent: @opts[:parent]
-      }
+    def instrument(event, data)
+      Graphiti.tracer.trace(event, data) do |trace_scope|
+        tags = {
+          'graphiti.resource' => @resource.class.name,
+          'graphiti.filters' => @opts[:params][:filter],
+          'graphiti.pagination' => @opts[:params][:page],
+          'graphiti.sorting' => @opts[:params][:sort],
+        }
+        Graphiti.tracer.apply_tags(trace_scope.span, tags)
 
-      Graphiti.tracer.trace('resolve') do |trace_scope|
-        Graphiti.tracer.set_scope_tags(trace_scope.span, opts[:params])
-
-        Graphiti.broadcast("data", opts) do |payload|
-          yield payload
-        end
+        yield trace_scope
       end
     end
 
@@ -98,10 +103,7 @@ module Graphiti
     end
 
     def apply_scoping(scope, opts)
-      Graphiti.tracer.trace('build_scope') do |trace_scope|
-        trace_scope.span.set_tag('graphiti.resource', @resource.class.name)
-        Graphiti.tracer.set_scope_tags(trace_scope.span, @opts[:params])
-
+      instrument 'build_scope', opts do
         @object = scope
         add_scoping(nil, Graphiti::Scoping::DefaultFilter, opts)
         add_scoping(:filter, Graphiti::Scoping::Filter, opts)

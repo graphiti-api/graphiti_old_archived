@@ -38,7 +38,7 @@ module Graphiti
     private
 
     def render(renderer)
-      Graphiti.broadcast(:render, records: records, options: options) do
+      Graphiti.tracer.trace('render', records: records, options: options) do
         options[:fields] = proxy.fields
         options[:expose] ||= {}
         options[:expose][:extra_fields] = proxy.extra_fields

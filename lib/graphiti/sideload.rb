@@ -199,7 +199,7 @@ module Graphiti
       end
 
       if self.class.scope_proc
-        Graphiti.broadcast("data", resource_class: resource.class, sideload: self) do |payload|
+        Graphiti.broadcast("resolve", resource_class: resource.class, sideload: self) do |payload|
           sideload_scope = fire_scope(parents)
           sideload_scope = Scope.new sideload_scope,
             resource,
