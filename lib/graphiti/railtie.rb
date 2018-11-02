@@ -21,7 +21,7 @@ module Graphiti
         end
       end
 
-      if Mime[:jsonapi].nil? # rails 4
+      if Mime[:graphiti].nil? # rails 4
         Mime::Type.register('application/vnd.api+json', :graphiti)
       end
       register_parameter_parser
@@ -64,7 +64,7 @@ module Graphiti
       end
 
       ActiveSupport.on_load(:action_controller) do
-        ::ActionController::Renderers.add(:jsonapi_errors) do |proxy, options|
+        ::ActionController::Renderers.add(:graphiti_errors) do |proxy, options|
           self.content_type ||= Mime[:graphiti]
 
           validation = GraphitiErrors::Serializers::Validation.new \
