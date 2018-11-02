@@ -8,6 +8,7 @@ module Graphiti
     module RendererOverrides
       def _build(object, exposures, klass)
         puts "class name is #{klass}"
+        puts exposures.inspect
         resource = object.instance_variable_get(:@__graphiti_resource)
         klass = object.instance_variable_get(:@__graphiti_serializer)
         klass.new(exposures.merge(object: object, resource: resource))
