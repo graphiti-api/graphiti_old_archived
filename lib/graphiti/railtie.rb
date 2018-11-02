@@ -22,7 +22,7 @@ module Graphiti
       end
 
       if Mime[:jsonapi].nil? # rails 4
-        Mime::Type.register('application/vnd.api+json', :jsonapi)
+        Mime::Type.register('application/vnd.api+json', :graphiti)
       end
       register_parameter_parser
       register_renderers
