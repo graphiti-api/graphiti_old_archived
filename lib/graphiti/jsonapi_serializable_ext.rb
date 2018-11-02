@@ -9,7 +9,7 @@ module Graphiti
       def _build(object, exposures, klass)
         puts "class name is #{klass}"
         puts exposures.inspect
-        puts "controller is #{self}"
+        puts "controller is #{self.class.name}"
         resource = object.instance_variable_get(:@__graphiti_resource)
         klass = object.instance_variable_get(:@__graphiti_serializer)
         klass.new(exposures.merge(object: object, resource: resource))
