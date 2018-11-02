@@ -10,9 +10,14 @@ module Graphiti
         puts "class name is #{klass}"
         puts exposures.inspect
         puts "controller is #{self.class.name}"
-        resource = object.instance_variable_get(:@__graphiti_resource)
-        klass = object.instance_variable_get(:@__graphiti_serializer)
-        klass.new(exposures.merge(object: object, resource: resource))
+        
+        if klass.values.any?
+          klass[object.class.name.to_sym].new(exposures.merge(object: object))
+        else    
+          resource = object.instance_variable_get(:@__graphiti_resource)
+          klass = object.instance_variable_get(:@__graphiti_serializer)
+          klass.new(exposures.merge(object: object, resource: resource))
+        end
       end
     end
 
