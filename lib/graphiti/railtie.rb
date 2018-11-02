@@ -47,7 +47,7 @@ module Graphiti
 
     def register_renderers
       ActiveSupport.on_load(:action_controller) do
-        ::ActionController::Renderers.add(:jsonapi) do |proxy, options|
+        ::ActionController::Renderers.add(:graphiti) do |proxy, options|
           self.content_type ||= Mime[:jsonapi]
 
           opts = {}
