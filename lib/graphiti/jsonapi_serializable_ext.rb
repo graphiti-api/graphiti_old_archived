@@ -7,6 +7,7 @@ module Graphiti
     # To ensure we always render with the *resource* serializer
     module RendererOverrides
       def _build(object, exposures, klass)
+        puts "class name is #{klass}"
         resource = object.instance_variable_get(:@__graphiti_resource)
         klass = object.instance_variable_get(:@__graphiti_serializer)
         klass.new(exposures.merge(object: object, resource: resource))
