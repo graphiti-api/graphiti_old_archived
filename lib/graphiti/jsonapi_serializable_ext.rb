@@ -6,11 +6,7 @@ module Graphiti
     # Instead, this variable is assigned when the query is resolved
     # To ensure we always render with the *resource* serializer
     module RendererOverrides
-      def _build(object, exposures, klass)
-        puts "class name is #{klass}"
-        puts exposures.inspect
-        puts "controller is #{self.class.name}"
-        
+      def _build(object, exposures, klass)        
         if klass.values.any?
           klass[object.class.name.to_sym].new(exposures.merge(object: object))
         else    
