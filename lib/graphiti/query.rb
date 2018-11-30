@@ -30,6 +30,10 @@ module Graphiti
       end
     end
 
+    def pagination_links?
+      return !!@params[:pagination_links]
+    end
+
     def debug_requested?
       !!@params[:debug]
     end
@@ -44,6 +48,7 @@ module Graphiti
           h[:extra_fields] = extra_fields unless extra_fields.empty?
         end
         h[:stats] = stats unless stats.empty?
+
         h[:include] = sideload_hash unless sideload_hash.empty?
       end
     end

@@ -80,6 +80,13 @@ module Graphiti
       end
     end
 
+    def links
+      @pagination_links ||= if @query.pagination_links?
+        payload = Links::Payload.new(self)
+        payload.generate
+      end
+    end
+
     def save(action: :create)
       # TODO: remove this. Only used for persisting many-to-many with AR
       # (see activerecord adapter)
