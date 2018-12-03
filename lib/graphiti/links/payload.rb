@@ -26,12 +26,13 @@ module Graphiti
 
       def pagination_link(page)
         uri = URI(proxy.resource.endpoint[:url].to_s)
-        uri.query = {
+        # Overwrite the pagination query params with the desired page
+        uri.query = proxy.query.hash.merge({
           page: {
             number: page,
             size: page_size
           }
-        }.to_query
+        }).to_query
         uri.to_s
       end
     end

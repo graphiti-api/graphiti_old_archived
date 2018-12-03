@@ -48,7 +48,6 @@ module Graphiti
           h[:extra_fields] = extra_fields unless extra_fields.empty?
         end
         h[:stats] = stats unless stats.empty?
-
         h[:include] = sideload_hash unless sideload_hash.empty?
       end
     end
