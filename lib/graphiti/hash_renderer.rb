@@ -36,7 +36,7 @@ module Graphiti
       opts = options.slice(:fields, :include)
       to_hash(serializers, opts).tap do |hash|
         hash.merge!(options.slice(:meta)) if !options[:meta].empty?
-        hash.merge!(options.slice(:links)) if !options[:links].empty?
+        hash.merge!(options.slice(:links)) if options[:links]
       end
     end
 
