@@ -81,7 +81,6 @@ module Graphiti
     end
 
     def links
-      binding.pry
       @pagination_links ||= if @query.pagination_links?
                               links_payload
                             end
