@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Graphiti::Links::Payload do
+RSpec.describe Graphiti::PaginationLinks::Payload do
   let(:proxy)      { double(resource: resource, query: query, scope: scope) }
   let(:resource)   { double(endpoint: endpoint) }
   let(:query)      { double(hash: params) }
@@ -43,6 +43,15 @@ RSpec.describe Graphiti::Links::Payload do
     end
     it 'generates a payload with links that contain current params' do
       expect(first_link).to eq pagination_link(1)
+    end
+  end
+
+  describe '#pagination_link' do
+    subject { instance.send(:pagination_link, 1) }
+    let(:filter_query){ { filter: params[:filter] }.to_query }
+
+    it 'should contain current params' do
+      expect(subject).to include(filter_query)
     end
   end
 end

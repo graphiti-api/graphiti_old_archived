@@ -1,5 +1,5 @@
 module Graphiti
-  module Links
+  module PaginationLinks
     class Payload
       attr_reader :proxy
       def initialize(proxy)
@@ -28,11 +28,11 @@ module Graphiti
         uri = URI(proxy.resource.endpoint[:url].to_s)
         # Overwrite the pagination query params with the desired page
         uri.query = proxy.query.hash.merge({
-          page: {
-            number: page,
-            size: page_size
-          }
-        }).to_query
+                                             page: {
+                                               number: page,
+                                               size: page_size
+                                             }
+                                           }).to_query
         uri.to_s
       end
     end
