@@ -152,9 +152,9 @@ RSpec.describe 'serialization' do
       end
     end
 
-    context "when rendering links" do
+    context "when rendering pagination links" do
       before do
-        allow(proxy).to receive(:links).and_return(pagination_links)
+        allow(proxy).to receive(:pagination_links).and_return(pagination_links)
       end
       let(:pagination_links){ { "page" => { "number" => 1, "size" => 20 } } }
       let(:json){ JSON.parse(proxy.to_json) }
