@@ -7,33 +7,16 @@ module Graphiti
       end
 
       def generate
-        {  }.tap do |links|
-          links[:first] = pagination_link(1)
-          links[:last] = pagination_link(collection.total_pages)
-          links[:prev] = pagination_link(collection.prev_page) if collection.prev_page
-          links[:next] = pagination_link(collection.next_page) if collection.next_page
-        end
+        pagination_backend.generate
       end
 
       private
-      def collection
-        @collection ||= proxy.scope.object
-      end
-
-      def page_size
-        @page_size ||= collection.current_per_page
-      end
-
-      def pagination_link(page)
-        uri = URI(proxy.resource.endpoint[:url].to_s)
-        # Overwrite the pagination query params with the desired page
-        uri.query = proxy.query.hash.merge({
-                                             page: {
-                                               number: page,
-                                               size: page_size
-                                             }
-                                           }).to_query
-        uri.to_s
+      def pagination_backend
+        @pagination_backend ||= if defined?(Kaminari)
+                                  KaminariBackend.new(proxy)
+                                else
+                                  raise "Only Kaminari is supported for pagination links"
+                                end
       end
     end
   end

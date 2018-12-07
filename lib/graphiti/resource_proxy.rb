@@ -80,9 +80,9 @@ module Graphiti
       end
     end
 
-    def links
+    def pagination_links
       @pagination_links ||= if @query.pagination_links?
-                              links_payload.generate
+                              pagination_links_payload.generate
                             end
     end
 
@@ -136,8 +136,8 @@ module Graphiti
 
     private
 
-    def links_payload
-      @links_payload ||= Links::Payload.new(self)
+    def pagination_links_payload
+      @pagination_links_payload ||= PaginationLinks::Payload.new(self)
     end
 
     def persist
