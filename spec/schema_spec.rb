@@ -53,14 +53,14 @@ RSpec.describe Graphiti::Schema do
             relationships: {
               positions: {
                 resource: 'Schema::PositionResource',
-                type: 'has_many'
+                type: 'has_many',
+                description: nil,
                 #writable: true,
                 #readable: true
               }
             }
           }
         ],
-        base_url: 'http://example.com',
         endpoints: {
           :"/api/v1/schema/employees" => {
             actions: {
@@ -80,6 +80,10 @@ RSpec.describe Graphiti::Schema do
           string: {
             kind: 'scalar',
             description: 'Base Type.'
+          },
+          uuid: {
+            description: 'Base Type. Like a normal string, but by default only eq/!eq and case-sensitive.',
+            kind: 'scalar'
           },
           integer: {
             kind: 'scalar',
@@ -121,6 +125,10 @@ RSpec.describe Graphiti::Schema do
             kind: 'array',
             description: 'Base Type.'
           },
+          array_of_uuids: {
+            description: 'Base Type.',
+            kind: 'array'
+          },
           array_of_integers: {
             kind: 'array',
             description: 'Base Type.'
@@ -147,7 +155,6 @@ RSpec.describe Graphiti::Schema do
 
     let(:application_resource) do
       Class.new(Graphiti::Resource) do
-        self.base_url = 'http://example.com'
         self.endpoint_namespace = '/api/v1'
       end
     end
@@ -209,10 +216,6 @@ RSpec.describe Graphiti::Schema do
 
     it 'has correct types' do
       expect(schema[:types]).to eq(expected[:types])
-    end
-
-    it 'has correct base url' do
-      expect(schema[:base_url]).to eq(expected[:base_url])
     end
 
     context 'when no resources passed' do
@@ -621,6 +624,7 @@ RSpec.describe Graphiti::Schema do
 
       it 'associates the relationship with multiple resources' do
         expect(schema[:resources][0][:relationships][:dwelling]).to eq({
+          description: nil,
           type: 'polymorphic_belongs_to',
           resources: ['Schema::HouseResource', 'Schema::CondoResource']
         })
