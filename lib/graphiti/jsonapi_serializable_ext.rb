@@ -6,10 +6,12 @@ module Graphiti
     # Instead, this variable is assigned when the query is resolved
     # To ensure we always render with the *resource* serializer
     module RendererOverrides
-      def _build(object, exposures, klass)        
+      def _build(object, exposures, klass)
+        puts exposures
+
         if klass.values.any?
           klass[object.class.name.to_sym].new(exposures.merge(object: object))
-        else    
+        else
           resource = object.instance_variable_get(:@__graphiti_resource)
           klass = object.instance_variable_get(:@__graphiti_serializer)
           klass.new(exposures.merge(object: object, resource: resource))
@@ -39,7 +41,7 @@ module Graphiti
       end
     end
 
-    JSONAPI::Serializable::Relationship.send(:prepend, RelationshipOverrides)
-    JSONAPI::Serializable::Renderer.send(:prepend, RendererOverrides)
+    JSONAPI::Serializable::Relationship.send(:include, RelationshipOverrides)
+    JSONAPI::Serializable::Renderer.send(:include, RendererOverrides)
   end
 end
