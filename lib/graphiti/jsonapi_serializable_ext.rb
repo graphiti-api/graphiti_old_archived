@@ -36,7 +36,7 @@ module Graphiti
       end
     end
 
-    JSONAPI::Serializable::Relationship.send(:include, RelationshipOverrides)
-    JSONAPI::Serializable::Renderer.send(:include, RendererOverrides)
+    JSONAPI::Serializable::Relationship.send(:prepend, RelationshipOverrides)
+    JSONAPI::Serializable::Renderer.send(:prepend, RendererOverrides)
   end
 end
