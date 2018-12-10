@@ -8,14 +8,9 @@ module Graphiti
     module RendererOverrides
       def _build(object, exposures, klass)
         puts exposures
-
-        if klass.values.any?
-          klass[object.class.name.to_sym].new(exposures.merge(object: object))
-        else
-          resource = object.instance_variable_get(:@__graphiti_resource)
-          klass = object.instance_variable_get(:@__graphiti_serializer)
-          klass.new(exposures.merge(object: object, resource: resource))
-        end
+        resource = object.instance_variable_get(:@__graphiti_resource)
+        klass = object.instance_variable_get(:@__graphiti_serializer)
+        klass.new(exposures.merge(object: object, resource: resource))
       end
     end
 
