@@ -24,7 +24,7 @@ module Graphiti
       def data
         @_resources_block = proc do
           resources = yield
-          puts "RESOURCES: #{resources.inspect}"
+          binding.pry
 
           if resources.nil?
             nil
