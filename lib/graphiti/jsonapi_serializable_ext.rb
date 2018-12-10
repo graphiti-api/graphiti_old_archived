@@ -9,8 +9,13 @@ module Graphiti
       def _build(object, exposures, klass)
         puts exposures
         resource = object.instance_variable_get(:@__graphiti_resource)
-        klass = object.instance_variable_get(:@__graphiti_serializer)
-        klass.new(exposures.merge(object: object, resource: resource))
+
+        if resource.present?
+          klass = object.instance_variable_get(:@__graphiti_serializer)
+          klass.new(exposures.merge(object: object, resource: resource))
+        else
+          super(object, exposures, klass)
+        end
       end
     end
 
@@ -36,7 +41,7 @@ module Graphiti
       end
     end
 
-    JSONAPI::Serializable::Relationship.send(:prepend, RelationshipOverrides)
-    JSONAPI::Serializable::Renderer.send(:prepend, RendererOverrides)
+    JSONAPI::Serializable::Relationship.send(:include, RelationshipOverrides)
+    JSONAPI::Serializable::Renderer.send(:include, RendererOverrides)
   end
 end
