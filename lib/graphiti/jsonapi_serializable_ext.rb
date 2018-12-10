@@ -1,7 +1,3 @@
-# This patch is necessary in order to support V1 of the API using JSONAPI-RAILS
-# while supporting V2 using Graphiti.
-# TODO: Remove this class when we no longer support V1 of the API
-
 module Graphiti
   module JsonapiSerializableExt
     # This library looks up a serializer based on the record's class name
