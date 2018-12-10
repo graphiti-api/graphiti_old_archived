@@ -24,6 +24,8 @@ module Graphiti
       def data
         @_resources_block = proc do
           resources = yield
+          puts "RESOURCES: #{resources.inspect}"
+
           if resources.nil?
             nil
           elsif resources.respond_to?(:to_ary)
@@ -41,7 +43,7 @@ module Graphiti
       end
     end
 
-    JSONAPI::Serializable::Relationship.send(:include, RelationshipOverrides)
+    JSONAPI::Serializable::Relationship.send(:prepend, RelationshipOverrides)
     JSONAPI::Serializable::Renderer.send(:prepend, RendererOverrides)
   end
 end
