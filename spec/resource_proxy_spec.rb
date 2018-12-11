@@ -2,10 +2,6 @@ require 'spec_helper'
 require_relative "pagination_links/pagination_context.rb"
 
 RSpec.describe Graphiti::ResourceProxy do
-  # let(:resource){ double(endpoint: {  }) }
-  # let(:scope){ double(object: nil) }
-  # let(:query){ double }
-  # let(:opts){ {  } }
   include_context "pagination_context"
   let(:instance){ described_class.new(resource, scope, query, {  }) }
   describe "pagination_links" do
