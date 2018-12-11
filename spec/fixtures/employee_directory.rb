@@ -27,6 +27,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string :first_name
     t.string :last_name
     t.integer :age
+    t.string :nickname
+    t.string :salutation
+    t.string :professional_titles
   end
 
   create_table :positions do |t|

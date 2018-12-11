@@ -2,51 +2,32 @@ if ENV["APPRAISAL_INITIALIZED"]
   RSpec.describe 'persistence', type: :controller do
     include GraphitiSpecHelpers
 
-    # todo ?include=foo
-    controller(ApplicationController) do
-      def create
-        employee = EmployeeResource.build(params)
-
-        if employee.save
-          render jsonapi: employee
-        else
-          render json: {
-            errors: {
-              employee: employee.errors,
-              positions: employee.data.positions.map(&:errors),
-              departments: employee.data.positions.map(&:department).compact.map(&:errors)
-            }
-          }
-        end
-      end
-
-      def update
-        employee = EmployeeResource.find(params)
-
-        if employee.update_attributes
-          render jsonapi: employee
-        else
-          render json: { error: employee.errors }
-        end
-      end
-
-      def destroy
-        employee = EmployeeResource.find(params)
-
-        if employee.destroy
-          render json: { meta: {} }
-        else
-          render json: { error: employee.errors }
-        end
-      end
-    end
+    # defined in spec/supports/rails/employee_controller.rb
+    controller(ApplicationController, &EMPLOYEE_CONTROLLER_BLOCK)
 
     def do_post
-      post :create, params: payload
+      if Rails::VERSION::MAJOR == 4
+        post :create, payload
+      else
+        post :create, params: payload
+      end
     end
 
     def do_put(id)
-      put :update, params: payload
+      if Rails::VERSION::MAJOR == 4
+        put :update, payload
+      else
+        put :update, params: payload
+      end
+    end
+
+    def do_destroy(params)
+      if Rails::VERSION::MAJOR == 4
+        delete :destroy, params
+      else
+        delete :destroy, params: params
+      end
+
     end
 
     before do
@@ -162,13 +143,13 @@ if ENV["APPRAISAL_INITIALIZED"]
 
       it 'deletes the object' do
         expect {
-          delete :destroy, params: { id: employee.id }
+          do_destroy({ id: employee.id })
         }.to change { Employee.count }.by(-1)
         expect { employee.reload }.to raise_error(ActiveRecord::RecordNotFound)
       end
 
       it 'responds with 200, empty meta' do
-        delete :destroy, params: { id: employee.id }
+        do_destroy({ id: employee.id })
         expect(response.status).to eq(200)
         expect(json).to eq({ 'meta' => {} })
       end
@@ -178,7 +159,7 @@ if ENV["APPRAISAL_INITIALIZED"]
 
         it 'responds with correct error payload' do
           expect {
-            delete :destroy, params: { id: employee.id }
+            do_destroy({ id: employee.id })
           }.to_not change { Employee.count }
           expect(json['error']).to eq('base' => ['Forced validation error'])
         end
