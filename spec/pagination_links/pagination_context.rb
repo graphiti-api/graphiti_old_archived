@@ -14,7 +14,7 @@ RSpec.shared_context "pagination_context", :shared_context => :metadata do
   let(:proxy)      { double(resource: resource, query: query, scope: scope) }
   let(:resource)   { double(endpoint: endpoint) }
   let(:query)      { double(hash: params) }
-  let(:scope)      { double(object: collection) }
+  let(:scope)      { double(object: collection, pagination: double(size: current_per_page)) }
   let(:collection) { double(total_pages: total_pages,
                             prev_page: prev_page,
                             next_page: next_page,

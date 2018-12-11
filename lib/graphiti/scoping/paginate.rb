@@ -66,6 +66,14 @@ module Graphiti
       custom_scope.call(@scope, number, size, resource.context)
     end
 
+    def number
+      (page_param[:number] || 1).to_i
+    end
+
+    def size
+      (page_param[:size] || resource.default_page_size || DEFAULT_PAGE_SIZE).to_i
+    end
+
     private
 
     def requested?
@@ -74,14 +82,6 @@ module Graphiti
 
     def page_param
       @page_param ||= (query_hash[:page] || {})
-    end
-
-    def number
-      (page_param[:number] || 1).to_i
-    end
-
-    def size
-      (page_param[:size] || resource.default_page_size || DEFAULT_PAGE_SIZE).to_i
     end
   end
 end

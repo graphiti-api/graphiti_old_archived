@@ -1,6 +1,6 @@
 module Graphiti
   class Scope
-    attr_accessor :object, :unpaginated_object
+    attr_accessor :object, :unpaginated_object, :pagination
 
     def initialize(object, resource, query, opts = {})
       @object    = object
@@ -98,12 +98,17 @@ module Graphiti
       add_scoping(:filter, Graphiti::Scoping::Filter, opts)
       add_scoping(:sort, Graphiti::Scoping::Sort, opts)
       add_scoping(:paginate, Graphiti::Scoping::Paginate, opts)
+      @pagination = add_scoping2(:paginate, Graphiti::Scoping::Paginate, opts)
       @object
     end
 
     def add_scoping(key, scoping_class, opts, default = {})
       @object = scoping_class.new(@resource, @query.hash, @object, opts).apply
       @unpaginated_object = @object unless key == :paginate
+    end
+
+    def add_scoping2(key, scoping_class, opts, default = {})
+      scoping_class.new(@resource, @query.hash, @object, opts)
     end
   end
 end
