@@ -53,6 +53,22 @@ RSpec.describe 'serialization' do
     Hash.from_xml(xml)['data']['data']
   end
 
+  context 'when rendering jsonapi' do
+    let(:jsonapi){ JSON.parse(proxy.to_jsonapi) }
+
+    context "when rendering pagination links" do
+      before do
+        allow(proxy).to receive(:pagination_links?).and_return(true)
+        allow(proxy).to receive(:pagination_links).and_return(pagination_links)
+      end
+      let(:pagination_links){ { "page" => { "number" => 1, "size" => 20 } } }
+      let(:links){ jsonapi['links'] }
+      it 'works' do
+        expect(links).to eq(pagination_links)
+      end
+    end
+  end
+
   context 'when rendering vanilla json' do
     it 'works' do
       params.delete(:include)
@@ -149,18 +165,6 @@ RSpec.describe 'serialization' do
           'foo' => 'bar',
           'stats' => { 'total' => { 'count' => 'poro_count_total' } }
         })
-      end
-    end
-
-    context "when rendering pagination links" do
-      before do
-        allow(proxy).to receive(:pagination_links).and_return(pagination_links)
-      end
-      let(:pagination_links){ { "page" => { "number" => 1, "size" => 20 } } }
-      let(:json){ JSON.parse(proxy.to_json) }
-      let(:links){ json['links'] }
-      it 'works' do
-        expect(links).to eq(pagination_links)
       end
     end
   end
