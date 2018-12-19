@@ -49,7 +49,7 @@ module Graphiti
 
       def page_size
         @page_size ||= (page_param[:size] ||
-                        resource.default_page_size ||
+                        @proxy.resource.default_page_size ||
                         Graphiti::Scoping::Paginate::DEFAULT_PAGE_SIZE).to_i
       end
 

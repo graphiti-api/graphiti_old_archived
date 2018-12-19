@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.shared_context "pagination_context", shared_context: :metadata do
   let(:proxy)      { double(resource: resource, query: query, scope: scope); Graphiti::ResourceProxy.new(resource, scope, query) }
-  let(:resource)   { double(endpoint: endpoint) }
+  let(:resource)   { double(endpoint: endpoint, default_page_size: nil) }
   let(:query)      { double(hash: params) }
   let(:scope)      { double(object: collection, pagination: double(size: current_per_page)) }
   let(:pagination_delegate) { Graphiti::Delegates::Pagination.new(proxy) }

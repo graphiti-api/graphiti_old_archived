@@ -48,11 +48,18 @@ RSpec.describe Graphiti::Delegates::Pagination do
         expect(subject[:prev]).to be_nil
       end
     end
+
+    context "when no size param is passed" do
+      let(:params){ {  } }
+      it 'returns the default size' do
+        expect(subject[:first]).to eq(pagination_link(1, size: Graphiti::Scoping::Paginate::DEFAULT_PAGE_SIZE))
+      end
+    end
   end
 
-  def pagination_link(number)
+  def pagination_link(number, size: current_per_page)
     uri = URI(endpoint[:url])
-    uri.query = params.merge(page: { number: number, size: current_per_page }).to_query
+    uri.query = params.merge(page: { number: number, size: size }).to_query
     uri.to_s
   end
 
