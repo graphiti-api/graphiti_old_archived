@@ -196,6 +196,10 @@ module Graphiti
       end
     end
 
+    def paginate?
+      not [false, 'false'].include?(@params[:paginate])
+    end
+
     private
 
     # Try to find on this resource
