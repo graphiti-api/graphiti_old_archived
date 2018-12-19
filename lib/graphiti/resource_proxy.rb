@@ -4,6 +4,8 @@ module Graphiti
 
     attr_reader :resource, :query, :scope, :payload
 
+    delegate :pagination_links?, to: :@query, allow_nil: true
+
     def initialize(resource, scope, query,
       payload: nil,
       single: false,
@@ -81,7 +83,7 @@ module Graphiti
     end
 
     def pagination_links
-      @pagination_links ||= if @query.pagination_links?
+      @pagination_links ||= if pagination_links?
                               pagination_links_payload.generate
                             end
     end
