@@ -4,8 +4,6 @@ module Graphiti
 
     attr_reader :resource, :query, :scope, :payload
 
-    delegate :pagination_links?, to: :@query, allow_nil: true
-
     def initialize(resource, scope, query,
       payload: nil,
       single: false,
@@ -82,10 +80,8 @@ module Graphiti
       end
     end
 
-    def pagination_links
-      @pagination_links ||= if pagination_links?
-                              pagination_links_payload.generate
-                            end
+    def pagination
+      @pagination ||= Delegates::Pagination.new(self)
     end
 
     def save(action: :create)
@@ -137,10 +133,6 @@ module Graphiti
     end
 
     private
-
-    def pagination_links_payload
-      @pagination_links_payload ||= PaginationLinks::Payload.new(self)
-    end
 
     def persist
       @resource.transaction do

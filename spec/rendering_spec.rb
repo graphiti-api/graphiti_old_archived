@@ -58,9 +58,9 @@ RSpec.describe 'serialization' do
 
     context "when rendering pagination links" do
       before do
-        allow(proxy).to receive(:pagination_links?).and_return(true)
-        allow(proxy).to receive(:pagination_links).and_return(pagination_links)
+        allow(proxy).to receive(:pagination).and_return(pagination_delegate)
       end
+      let(:pagination_delegate){ double(:links? => true, :links => pagination_links ) }
       let(:pagination_links){ { "page" => { "number" => 1, "size" => 20 } } }
       let(:links){ jsonapi['links'] }
       it 'works' do
