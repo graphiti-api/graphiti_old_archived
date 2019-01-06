@@ -27,8 +27,8 @@ module Graphiti
         end
       end
 
-      if Mime[:jsonapi].nil? # rails 4
-        Mime::Type.register('application/vnd.api+json', :jsonapi)
+      if Mime[:graphiti].nil? # rails 4
+        Mime::Type.register('application/vnd.api+json', :graphiti)
       end
       register_parameter_parser
       register_renderers
@@ -39,22 +39,22 @@ module Graphiti
     # from jsonapi-rails
     PARSER = lambda do |body|
       data = JSON.parse(body)
-      data[:format] = :jsonapi
+      data[:format] = :graphiti
       data.with_indifferent_access
     end
 
     def register_parameter_parser
       if ::Rails::VERSION::MAJOR >= 5
-        ActionDispatch::Request.parameter_parsers[:jsonapi] = PARSER
+        ActionDispatch::Request.parameter_parsers[:graphiti] = PARSER
       else
-        ActionDispatch::ParamsParser::DEFAULT_PARSERS[Mime[:jsonapi]] = PARSER
+        ActionDispatch::ParamsParser::DEFAULT_PARSERS[Mime[:graphiti]] = PARSER
       end
     end
 
     def register_renderers
       ActiveSupport.on_load(:action_controller) do
-        ::ActionController::Renderers.add(:jsonapi) do |proxy, options|
-          self.content_type ||= Mime[:jsonapi]
+        ::ActionController::Renderers.add(:graphiti) do |proxy, options|
+          self.content_type ||= Mime[:graphiti]
 
           opts = {}
           if respond_to?(:default_jsonapi_render_options)
@@ -70,8 +70,8 @@ module Graphiti
       end
 
       ActiveSupport.on_load(:action_controller) do
-        ::ActionController::Renderers.add(:jsonapi_errors) do |proxy, options|
-          self.content_type ||= Mime[:jsonapi]
+        ::ActionController::Renderers.add(:graphiti_errors) do |proxy, options|
+          self.content_type ||= Mime[:graphiti]
 
           validation = GraphitiErrors::Serializers::Validation.new \
             proxy.data, proxy.payload.relationships
